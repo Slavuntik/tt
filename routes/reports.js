@@ -3,7 +3,8 @@ const router = express.Router();
 const databaseService=require('../utils/databaseService')
 const docx = require('docx');
 const { VerticalAlign, AlignmentType } = require('docx');
-const fs=require('fs')
+const fs=require('fs');
+const { captureRejectionSymbol } = require('events');
 
 
 console.log("Reports service")
@@ -46,8 +47,38 @@ const toFieldByIndex=function (index,petData,alias) {
 }
 
 router.get('/', async (req, res) => {
-    const { Document, Packer, Paragraph, Table, TableCell, TableRow , AlignmentType, Media} = docx;
-    let doc = new Document();
+    
+
+    if (req.query["csv"]) {
+        let csvPets=""
+        let pets=await databaseService.getAllPets()
+        csvPets=""
+        for (let i=0;i<pets.length;i++) {
+            let val=""
+            for (let j=0;j<pets[i].petData.length;j++) {
+                try {
+                    val+=getFieldByIndex(j,pets[i].petData).toString()+";"
+                }
+                catch(err) {
+                    val+=";"
+                    console.log(j,err)
+                }
+            }
+            csvPets+=val+"\n"
+        }
+
+        
+        
+        
+        res.setHeader('Content-Disposition', 'attachment; filename=AllPets.CSV');
+    res.send(Buffer.from(csvPets, 'utf-8'));  
+    console.log("report created")  
+
+    }
+    else {
+        const { Document, Packer, Paragraph, Table, TableCell, TableRow , AlignmentType, Media} = docx;
+
+        let doc = new Document();
 
     if (req.query["petid"]) {
         let pet=await databaseService.getPetById(req.query["petid"])
@@ -260,6 +291,7 @@ router.get('/', async (req, res) => {
     
     res.send(Buffer.from(b64string, 'base64'));  
     console.log("report created")  
+}
 })
 
 

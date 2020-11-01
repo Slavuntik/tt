@@ -48,6 +48,7 @@ class databaseService  {
                 s1+=st
             })
             script+=s0+s1+"--"+dic.values.length.toString()+" значений\n\n"
+            script+="--НЕОБХОДИМА КОНСУЛЬТАЦИЯ С ЗАКАЗЧИКОМ И РАСШИРЕННЫЙ НАБОР ИСХОДНЫХ ДАННЫХ\n";
         })
         return script;
     }
